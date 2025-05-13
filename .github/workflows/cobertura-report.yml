@@ -1,0 +1,38 @@
+name: 'Cobertura Coverage Markdown Report'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  coverage-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+          extensions: xml
+          tools: composer
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run tests and generate coverage.xml
+        run: vendor/bin/phpunit --coverage-cobertura coverage.xml
+      - name: Generate Coverage Markdown
+        uses: ./.github/actions/cobertura-report
+        with:
+          cobertura_xml: coverage.xml
+          output_md: coverage.md
+      - name: Display coverage report
+        run: cat coverage.md
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: cobertura-coverage-report
+          path: coverage.md

@@ -1,0 +1,23 @@
+name: "Cobertura Coverage to Markdown"
+description: "Parses a Cobertura XML report and generates a Markdown file with coverage summary."
+inputs:
+  cobertura_xml:
+    description: "Path to the Cobertura XML report file."
+    required: false
+    default: "coverage.xml"
+  output_md:
+    description: "Path to the output Markdown file."
+    required: false
+    default: "coverage.md"
+runs:
+  using: "composite"
+  steps:
+    - name: "Generate coverage markdown"
+      shell: bash
+      run: |
+        php "${{ github.action_path }}/parse_cobertura.php" "${{ inputs.cobertura_xml }}" "${{ inputs.output_md }}"
+    - name: "Upload coverage report"
+      uses: actions/upload-artifact@v3
+      with:
+        name: cobertura-coverage-report
+        path: ${{ inputs.output_md }}
