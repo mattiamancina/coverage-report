@@ -6,5 +6,6 @@ COPY parse_cobertura.php /app/parse_cobertura.php
 
 WORKDIR /app
 
-ENTRYPOINT ["php", "parse_cobertura.php"]
+ENTRYPOINT ["php"]
+CMD ["parse_cobertura.php"]
 
