@@ -1,5 +1,9 @@
-FROM alpine:3.10
+FROM php:8.1-cli-alpine
 
-COPY ./parse_cobertura.php parse_cobertura.php
+RUN apk add --no-cache bash
 
-ENTRYPOINT ["/parse_cobertura.php"]
+COPY parse_cobertura.php /app/parse_cobertura.php
+
+WORKDIR /app
+
+RUN php /app/parse_cobertura.php
