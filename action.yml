@@ -1,17 +1,21 @@
 # action.yml
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Cobertura Coverage Parser'
+description: 'Parses a Cobertura XML coverage report and outputs a Markdown summary'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
-    required: true
-    default: 'World'
-outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+  input:
+    description: 'Path to Cobertura XML report file'
+    required: false
+    default: 'input.xml'
+  output:
+    description: 'Path to output Markdown file'
+    required: false
+    default: 'coverage.md'
+outputs: {}
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
+    - -input
     - ${{ inputs.input }}
+    - -output
     - ${{ inputs.output }}
