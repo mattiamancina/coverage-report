@@ -35,6 +35,17 @@ type FileCoverage struct {
 	BranchRate float64
 }
 
+func generateBadge(coverage float64) string {
+	if coverage >= 75 {
+		return "green"
+	}
+
+	if coverage > 70 && coverage < 75 {
+		return "yellow"
+	}
+	return "red"
+}
+
 func main() {
 	inputPath := flag.String("input", "input.xml", "Path to Cobertura XML report file")
 	outputPath := flag.String("output", "coverage.md", "Path to output Markdown file")
@@ -72,8 +83,10 @@ func main() {
 	// Build Markdown report
 	var b strings.Builder
 	b.WriteString("# Coverage Report\n\n")
+	b.WriteString("![badge](https://img.shields.io/badge/Coverage-" + fmt.Sprintf("%f", cov.LineRate*100) + "%25-" + generateBadge(cov.LineRate*100) + ")")
+	b.WriteString("\n")
+	b.WriteString("\n")
 	b.WriteString(fmt.Sprintf("**Overall Line Coverage:** %.2f%%  \n", cov.LineRate*100))
-	b.WriteString(fmt.Sprintf("**Overall Branch Coverage:** %.2f%%  \n", cov.BranchRate*100))
 	b.WriteString("\n")
 	b.WriteString("<details>")
 	b.WriteString("<summary>File Coverage</summary>\n")
