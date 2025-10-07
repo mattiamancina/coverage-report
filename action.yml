@@ -6,6 +6,9 @@ inputs:
     description: 'Path to Cobertura XML report file'
     required: false
     default: 'input.xml'
+  changeList:
+    description: 'Path to changelist'
+    required: false
   output:
     description: 'Path to output Markdown file'
     required: false
@@ -13,9 +16,11 @@ inputs:
 outputs: {}
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/mattiamancina/coverage-report:v0.3.0'
+  image: 'docker://ghcr.io/mattiamancina/coverage-report:v1.0.0'
   args:
     - -input
     - ${{ inputs.input }}
+    - changeList
+    - ${{ inputs.changeList }}
     - -output
     - ${{ inputs.output }}

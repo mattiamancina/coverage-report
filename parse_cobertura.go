@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/xml"
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -48,6 +50,7 @@ func generateBadge(coverage float64) string {
 
 func main() {
 	inputPath := flag.String("input", "input.xml", "Path to Cobertura XML report file")
+	changeListPath := flag.String("changeList", "i", "Path to change list file")
 	outputPath := flag.String("output", "coverage.md", "Path to output Markdown file")
 	flag.Parse()
 
@@ -57,12 +60,23 @@ func main() {
 		os.Exit(1)
 	}
 
+	changeListFile, err := os.Open(*changeListPath)
+
+	var changedFiles []string
+	scanner := bufio.NewScanner(changeListFile)
+	for scanner.Scan() {
+		changedFiles = append(changedFiles, strings.TrimPrefix(scanner.Text(), "api/app/"))
+	}
+
 	var cov CoverageXML
 	if err := xml.Unmarshal(data, &cov); err != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing XML: %v\n", err)
 		os.Exit(1)
 	}
 
+	var changedFilesCoverage []FileCoverage
+
+	var avgCoverage float64
 	// Collect file coverage
 	var files []FileCoverage
 	for _, pkg := range cov.Packages {
@@ -72,6 +86,19 @@ func main() {
 				LineRate:   cls.LineRate,
 				BranchRate: cls.BranchRate,
 			})
+
+			if len(changedFiles) < 1 {
+				continue
+			}
+
+			if slices.Contains(changedFiles, cls.Filename) {
+				changedFilesCoverage = append(changedFilesCoverage, FileCoverage{
+					Filename:   cls.Filename,
+					LineRate:   cls.LineRate,
+					BranchRate: cls.BranchRate,
+				})
+				avgCoverage += cls.LineRate
+			}
 		}
 	}
 
@@ -83,18 +110,38 @@ func main() {
 	// Build Markdown report
 	var b strings.Builder
 	b.WriteString("# Coverage Report\n\n")
-	b.WriteString("![badge](https://img.shields.io/badge/Coverage-" + fmt.Sprintf("%f", cov.LineRate*100) + "%25-" + generateBadge(cov.LineRate*100) + ")")
+
+	b.WriteString("\n")
+	b.WriteString("\n")
+
+	if len(changedFilesCoverage) > 0 {
+
+		b.WriteString(fmt.Sprintf("**Changed Files Line Coverage:** %.2f%%  \n", cov.LineRate*100))
+		b.WriteString("\n")
+		b.WriteString("\n")
+		b.WriteString("![badge](https://img.shields.io/badge/Coverage-" + fmt.Sprintf("%f", avgCoverage/float64(len(changedFilesCoverage))*100) + "%25-" + generateBadge(avgCoverage/float64(len(changedFilesCoverage))*100) + ")")
+		b.WriteString("\n")
+		b.WriteString("\n")
+		b.WriteString("| File | Line Coverage | \n")
+		b.WriteString("| ---- | ------------- | \n")
+		for _, f := range changedFilesCoverage {
+			b.WriteString(fmt.Sprintf("| %s | %.2f%% |\n", f.Filename, f.LineRate*100))
+		}
+	}
 	b.WriteString("\n")
 	b.WriteString("\n")
 	b.WriteString(fmt.Sprintf("**Overall Line Coverage:** %.2f%%  \n", cov.LineRate*100))
 	b.WriteString("\n")
+	b.WriteString("![badge](https://img.shields.io/badge/Coverage-" + fmt.Sprintf("%f", cov.LineRate*100) + "%25-" + generateBadge(cov.LineRate*100) + ")")
+	b.WriteString("\n")
 	b.WriteString("<details>")
+	b.WriteString("\n")
 	b.WriteString("<summary>File Coverage</summary>\n")
 	b.WriteString("\n")
-	b.WriteString("| File | Line Coverage | Branch Coverage |\n")
-	b.WriteString("| ---- | ------------- | --------------- |\n")
+	b.WriteString("| File | Line Coverage | \n")
+	b.WriteString("| ---- | ------------- | \n")
 	for _, f := range files {
-		b.WriteString(fmt.Sprintf("| %s | %.2f%% | %.2f%% |\n", f.Filename, f.LineRate*100, f.BranchRate*100))
+		b.WriteString(fmt.Sprintf("| %s | %.2f%% |\n", f.Filename, f.LineRate*100))
 	}
 
 	b.WriteString("</details>")
