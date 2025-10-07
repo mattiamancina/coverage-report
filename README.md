@@ -5,16 +5,18 @@ Cobertura Coverage Parser is a GitHub Action that parses a Cobertura XML coverag
 ## Features
 
 - Parses Cobertura XML reports.
-- Generates an overall line and branch coverage summary.
+- Generates an line coverage summary for the changed files
+- Generates an overall line summary.
 - Lists individual file coverage in a collapsible section.
 - Outputs a Markdown file for use in GitHub workflows.
 
 ## Inputs
 
-| Name     | Description                           | Default      |
-|----------|---------------------------------------|--------------|
-| `input`  | Path to Cobertura XML report file     | `input.xml`  |
-| `output` | Path to the generated Markdown report | `coverage.md`|
+| Name         | Description                          | Default      |
+|--------------|--------------------------------------|--------------|
+| `input`      | Path to Cobertura XML report file    | `input.xml`  |
+| `changeList` | Path to a changelist file            |   |
+| `output`     | Path to the generated Markdown report | `coverage.md`|
 
 ## Usage
 
@@ -38,9 +40,10 @@ jobs:
           # e.g., using jacoco, pytest-cov, or other tools
 
       - name: Parse Cobertura coverage
-        uses: your-username/your-repo@v1
+        uses: mattiamancina/coverage-report@v1.0.0
         with:
           input: coverage.xml
+          changeList: changelist.txt
           output: coverage.md
 
       - name: Display Coverage Report
