@@ -20,7 +20,7 @@ runs:
   args:
     - -input
     - ${{ inputs.input }}
-    - changeList
+    - -changeList
     - ${{ inputs.changeList }}
     - -output
     - ${{ inputs.output }}
