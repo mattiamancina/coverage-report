@@ -116,7 +116,7 @@ func main() {
 
 	if len(changedFilesCoverage) > 0 {
 
-		b.WriteString(fmt.Sprintf("**Changed Files Line Coverage:** %.2f%%  \n", cov.LineRate*100))
+		b.WriteString(fmt.Sprintf("**Changed Files Line Coverage:** %.2f%%  \n", avgCoverage/float64(len(changedFilesCoverage))*100))
 		b.WriteString("\n")
 		b.WriteString("\n")
 		b.WriteString("![badge](https://img.shields.io/badge/Coverage-" + fmt.Sprintf("%f", avgCoverage/float64(len(changedFilesCoverage))*100) + "%25-" + generateBadge(avgCoverage/float64(len(changedFilesCoverage))*100) + ")")

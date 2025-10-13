@@ -16,7 +16,7 @@ inputs:
 outputs: {}
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/mattiamancina/coverage-report:v1.0.2'
+  image: 'docker://ghcr.io/mattiamancina/coverage-report:v1.0.3'
   args:
     - -input
     - ${{ inputs.input }}
